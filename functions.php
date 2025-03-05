@@ -150,33 +150,41 @@ add_filter('term_link', function($url, $term, $taxonomy) {
 }, 10, 3);
 
 // Add rewrite rules for 'portfolio-category' terms
-add_action('init', function() {
-    add_rewrite_rule('^projects/([^/]+)/?$', 'index.php?portfolio-category=$matches[1]', 'top');
-});
+// add_action('init', function() {
+//     add_rewrite_rule('^projects/([^/]+)/?$', 'index.php?portfolio-category=$matches[1]', 'top');
+// });
 
-// Add rewrite rules for portfolio items
-add_action('init', function() {
-    add_rewrite_rule('^projects/([^/]+)/([^/]+)/?$', 'index.php?portfolio-item=$matches[2]&portfolio-category=$matches[1]', 'top');
-});
+// // Add rewrite rules for portfolio items
+// add_action('init', function() {
+//     add_rewrite_rule('^projects/([^/]+)/([^/]+)/?$', 'index.php?portfolio-item=$matches[2]&portfolio-category=$matches[1]', 'top');
+// });
 
 // Update portfolio-item permalinks to include 'projects/category-slug/post-slug/'
-add_filter('post_type_link', function($post_link, $post) {
-    if ('portfolio-item' === $post->post_type) {
-        $terms = wp_get_post_terms($post->ID, 'portfolio-category');
-        $category = (!empty($terms) && !is_wp_error($terms)) ? $terms[0]->slug : '';
-        return home_url('projects/' . $category . '/' . $post->post_name . '/');
+// add_filter('post_type_link', function($post_link, $post) {
+//     if ('portfolio-item' === $post->post_type) {
+//         $terms = wp_get_post_terms($post->ID, 'portfolio-category');
+//         $category = (!empty($terms) && !is_wp_error($terms)) ? $terms[0]->slug : '';
+//         return home_url('projects/' . $category . '/' . $post->post_name . '/');
+//     }
+//     return $post_link;
+// }, 10, 2);
+
+// // Enable dynamic subpages under 'projects/'
+// add_action('init', function() {
+//     // Rule for handling all subpages under 'projects/'
+//     add_rewrite_rule('^projects/([^/]+)/([^/]+)/?$', 'index.php?post_type=portfolio-item&name=$matches[2]', 'top');
+//     // add_rewrite_rule('^projects/([^/]+)/([^/]+)/?$', 'index.php?pagename=projects/$matches[1]/$matches[2]', 'top');
+//     add_rewrite_rule('^projects/([^/]+)/?$', 'index.php?pagename=projects/$matches[1]', 'top');
+// });
+
+function modify_project_post_type_slug( $args, $post_type ) {
+    // Check if it's the 'project' custom post type
+    if ( 'portfolio-item' === $post_type ) {
+        // Update the slug for the custom post type
+        $args['rewrite']['slug'] = 'projects';
     }
-    return $post_link;
-}, 10, 2);
-
-// Enable dynamic subpages under 'projects/'
-add_action('init', function() {
-    // Rule for handling all subpages under 'projects/'
-    add_rewrite_rule('^projects/([^/]+)/([^/]+)/?$', 'index.php?post_type=portfolio-item&name=$matches[2]', 'top');
-    // add_rewrite_rule('^projects/([^/]+)/([^/]+)/?$', 'index.php?pagename=projects/$matches[1]/$matches[2]', 'top');
-    add_rewrite_rule('^projects/([^/]+)/?$', 'index.php?pagename=projects/$matches[1]', 'top');
-});
-
+    return $args;
+}
+add_filter( 'register_post_type_args', 'modify_project_post_type_slug', 10, 2 );
 // Flush rewrite rules on theme switch
 add_action('after_switch_theme', 'flush_rewrite_rules');
-
