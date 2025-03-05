@@ -177,14 +177,29 @@ add_filter('term_link', function($url, $term, $taxonomy) {
 //     add_rewrite_rule('^projects/([^/]+)/?$', 'index.php?pagename=projects/$matches[1]', 'top');
 // });
 
+// function modify_project_post_type_slug( $args, $post_type ) {
+//     // Check if it's the 'project' custom post type
+//     if ( 'portfolio-item' === $post_type ) {
+//         // Update the slug for the custom post type
+//         $args['rewrite']['slug'] = 'projects';
+//     }
+//     return $args;
+// }
+// add_filter( 'register_post_type_args', 'modify_project_post_type_slug', 10, 2 );
+
 function modify_project_post_type_slug( $args, $post_type ) {
-    // Check if it's the 'project' custom post type
+    // Check if it's the 'projects' custom post type
     if ( 'portfolio-item' === $post_type ) {
-        // Update the slug for the custom post type
-        $args['rewrite']['slug'] = 'projects';
+        // Update the slug for the custom post type to include the term slug before 'your-new-slug'
+        $args['rewrite'] = array(
+            'slug' => 'projects/%portfolio-category%/',  // Add your taxonomy term here
+            'with_front' => false,                    // Set to false if you don't want to include the front base
+            'hierarchical' => true                    // Set to true if you want a hierarchical URL structure
+        );
     }
     return $args;
 }
 add_filter( 'register_post_type_args', 'modify_project_post_type_slug', 10, 2 );
+
 // Flush rewrite rules on theme switch
 add_action('after_switch_theme', 'flush_rewrite_rules');
